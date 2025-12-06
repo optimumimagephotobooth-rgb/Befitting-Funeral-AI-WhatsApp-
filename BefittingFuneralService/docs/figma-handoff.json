@@ -1,0 +1,105 @@
+{
+  "frames": [
+    {
+      "frameName": "Supervisor Insight Drawer",
+      "component": "SupervisorInsightDrawer",
+      "api": {
+        "route": "POST /api/ai/supervisor",
+        "payload": "{ \"caseId\": \"{{case_id}}\" }",
+        "response": "{ \"riskScore\": 0-100, \"summary\": \"string\", \"action\": \"string\", \"tags\": [\"equipment\", \"delay\"] }"
+      },
+      "hook": "useSupervisorAI(caseId)",
+      "annotations": [
+        "Risk score ring (0–100) with gradient colors matching Tailwind emerald/rose.",
+        "CTA buttons call existing navigation logic (view case, open equipment panel, open work order panel).",
+        "Drawer syncs with automation alerts emitted via logCaseEvent."
+      ]
+    },
+    {
+      "frameName": "Training Overlay",
+      "component": "TrainingOverlay",
+      "api": {
+        "route": "GET /api/training/scenarios",
+        "response": "[ { \"id\": 1, \"title\": \"Equipment Return\", \"steps\": [\"Check condition\", \"Log damage\", \"Review lesson\"] } ]"
+      },
+      "hook": "useTrainingEngine(staffId)",
+      "annotations": [
+        "Slides down top-right on first page visit or when training lesson triggered.",
+        "Includes animated highlight for the relevant equipment/work-order block.",
+        "Sandbox action button toggles simulated mode (no write operations)."
+      ]
+    },
+    {
+      "frameName": "Training Dashboard",
+      "component": "TrainingDashboard",
+      "api": [
+        {
+          "route": "GET /api/training/modules",
+          "response": "{ \"modules\": [{ \"name\": \"Equipment Allocation Basics\", \"role\": \"operations\", \"description\": \"...\" }] }"
+        },
+        {
+          "route": "GET /api/training/progress",
+          "response": "{ \"modulesCompleted\": [], \"score\": 0 }"
+        }
+      ],
+      "hook": "useTrainingEngine(staffId)",
+      "annotations": [
+        "Each module card displays module name, role badge, progress bar, Retry button.",
+        "Sandbox Mode toggle appears at top right; when active, UI uses mock data and CTA buttons show 'Sandbox' label."
+      ]
+    },
+    {
+      "frameName": "Equipment Allocation Panel",
+      "component": "FuneralEquipmentPanel",
+      "api": [
+        {
+          "route": "GET /api/equipment?onlyAvailable=true",
+          "response": "{ \"equipment\": [] }"
+        },
+        {
+          "route": "POST /api/equipment/allocate",
+          "payload": "{ \"itemId\": \"\", \"caseId\": \"\", \"staffId\": \"\" }",
+          "response": "{ \"allocation\": { \"id\": \"\" } }"
+        },
+        {
+          "route": "POST /api/equipment/allocations/:id/pdf",
+          "response": "{ \"pdf\": \"base64\" }"
+        }
+      ],
+      "annotations": [
+        "Right column contains Allocation form and Generate PDF button.",
+        "List of allocations shows Return button and Download form button per row.",
+        "Log actions to automationRunner for Supervisor AI + training triggers."
+      ]
+    },
+    {
+      "frameName": "Tombstone Work Order Panel",
+      "component": "TombstoneWorkOrderPanel",
+      "api": [
+        {
+          "route": "POST /api/work-orders",
+          "payload": "{ \"caseId\": \"\", \"vendorId\": \"\" }"
+        },
+        {
+          "route": "PATCH /api/work-orders/:id/status",
+          "payload": "{ \"status\": \"completed\" }"
+        },
+        {
+          "route": "POST /api/work-orders/:id/pdf",
+          "response": "{ \"pdf\": \"base64\" }"
+        }
+      ],
+      "annotations": [
+        "CTA buttons for Regenerate certificate, download work-order PDF, status-change chips.",
+        "Panel shares data with work_order and supervisor_insights tables.",
+        "Attachments, notes, and training tips appear beneath the action buttons."
+      ]
+    }
+  ],
+  "notes": [
+    "Link each frame/component name with the corresponding React component so developers can quickly find the code.",
+    "Use the prompt files (backend/prompts/*.txt) to show AI behavior in the Figma spec.",
+    "Include the JSON spec file (docs/figma-spec.json) in the same Figma page or as a linked comment for API reference."
+  ]
+}
+
